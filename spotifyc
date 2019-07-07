@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# spotifyc: Control spotify with ease
+# -m|--mute-ads <opt: alt_music_dir> [RUN ONLY ONCE]
+# -o|--output <opt: format> [ '{{ artist }}, {{ title }}, {{ album }}' ]:
+#               give details on current song
+#               [for status bars like polybar, i3status, etc]
+# -t|--tail: give details on current song,
+#                 but continuously output[only on change]
+#                 [polybar script tail mode(this is better)]
+# -c|--toggle: toggles play/pause
+# -p|--prev: prev song on spotify
+# -n|--next: next song on spotify
+# -r|--play: play song
+# -s|--pause: pause song
+# -h|--help: show help
+
+while (( $# > 0 )); do
+    case "$1" in
+        -m|--mute-ads )
+            [ -d "$2" ] && MUSIC_DIR="$2" || MUSIC_DIR=
+            ./spotifyc_mute_ads "$MUSIC_DIR"
+            shift
+            [ -z "$MUSIC_DIR" ] || shift
+            ;;
+        -c|--toggle )
+            playerctl -p spotify play-pause
+            shift ;;
+        -p|--prev )
+            playerctl -p spotify previous
+            shift ;;
+        -n|--next )
+            playerctl -p spotify next
+            shift ;;
+        -r|--play )
+            playerctl -p spotify play
+            shift ;;
+        -s|--pause )
+            playerctl -p spotify pause
+            shift ;;
+        -h|--help )
+            show-help
+            shift ;;
+        * )
+            (>&2 echo Unkown option "$1")
+            shift ;;
+    esac
+done

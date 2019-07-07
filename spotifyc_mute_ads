@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+
+import os
+import random
+import subprocess
+import sys
+import threading
+import time
+
+import gi
+gi.require_version("Playerctl", "2.0")
+from gi.repository import Playerctl, GLib
+import vlc
+
+# trying to ensure only a single instance runs at a time
+# https://stackoverflow.com/a/1662504
+try:
+    import socket
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.bind("\0spotifyc_mute_ads")
+except socket.error as e:
+    print("This process is already running")
+    sys.exit(0)
+
+
+class MuteSpotifyAds:
+    def __init__(self, alt_music_dir=""):
+        self.manager = Playerctl.PlayerManager()
+        self.alt_music_dir = alt_music_dir
+        self.spotify_bound = False
+
+        self.current = { "ad": False }
+        self.previous = { "ad": False }
+
+        for player_name in self.manager.props.player_names:
+            if player_name.name == "spotify":
+                spotify = Playerctl.Player.new_from_name(player_name)
+                spotify.connect("metadata", self.mute_ads, self.manager)
+                self.spotify_bound = True
+                break
+
+        self.manager.connect("name-appeared", self.bind_player)
+        self.manager.connect("player-vanished", self.unbind_player)
+
+        main = GLib.MainLoop()
+        main.run()
+
+    def bind_player(self, manager, player_name):
+        if not self.spotify_bound and player_name.name == "spotify":
+            spotify = Playerctl.Player.new_from_name(player_name)
+            spotify.connect("metadata", self.mute_ads, self.manager)
+            self.manager.manage_player(spotify)
+
+    def unbind_player(self, manager, player):
+        if player.props.player_name == "spotify":
+            self.spotify_bound = False
+
+    def play_alt_song(self):
+        if self.alt_music_dir == "" or not os.path.isdir(self.alt_music_dir):
+            return
+        
+        # assuming that alt_music_dir contains only music files
+        music_file_path = random.choice(os.listdir(self.alt_music_dir))
+
+        vlc_player = vlc.MediaPlayer("file://" + self.alt_music_dir + music_file_path)
+        vlc_player.audio_set_volume(100)
+        vlc_player.play()
+        length = vlc_player.get_length() / 1000
+        time.sleep(length)
+
+    def get_spotify_sink(self):
+        pactl_out = subprocess.check_output(["pactl", "list", "sink-inputs"]).decode().strip().split()
+        closest_index = pactl_out.index('"Spotify"')
+        sink_index = "#-1"
+
+        for i in range(closest_index, 1, -1):
+            if pactl_out[i].startswith("#") and pactl_out[i-1] == "Input" and pactl_out[i-2] == "Sink":
+                sink_index = pactl_out[i]
+
+        return sink_index[1:]
+
+    def mute_spotify(self):
+        subprocess.run(["pactl", "set-sink-input-mute", self.get_spotify_sink(), "1"])
+
+    def unmute_spotify(self):
+        subprocess.run(["pactl", "set-sink-input-mute", self.get_spotify_sink(), "0"])
+
+    def handle_ad(self, player):
+        self.mute_spotify()
+        self.play_alt_song()
+        self.unmute_spotify()
+        player.play()
+
+    def mute_ads(self, player, metadata, manager):
+        artist = metadata['xesam:artist'][0]
+        title = metadata['xesam:title']
+        is_ad = self.is_ad(artist, title)
+
+        current = { "artist": artist, "title": title, "ad": is_ad }
+
+        if current != self.current:
+            self.previous = self.current
+            self.current = current
+
+            if is_ad:
+                if threading.activeCount() == 1:
+                    threading.Thread(target=self.handle_ad, args=(player,)).start()
+            else:
+                if self.previous["ad"]:
+                    player.pause()
+
+    def is_ad(self, artist, title):
+        return (artist == "" and (title == "Advertisement" or title == "Spotify"))
+
+if __name__ == '__main__':
+    alt_music_dir = ''
+
+    if len(sys.argv) == 2:
+        alt_music_dir = sys.argv[1]
+
+    MuteSpotifyAds(alt_music_dir)
