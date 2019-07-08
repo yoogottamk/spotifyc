@@ -1,19 +1,23 @@
 #!/bin/bash
 
-# spotifyc: Control spotify with ease
-# -m|--mute-ads <opt: alt_music_dir> [RUN ONLY ONCE]
-# -o|--output : give details on current song
-#               [for status bars like polybar, i3status, etc]
-# -f|--format: [ '{{ artist }}, {{ title }}, {{ album }}, .. see man playerctl for all' ]
-#               for icons, use {{ icon }}
-# -i|--icons "<icon to show when playing>" "<icon to show when song paused>": both args compulsory(can be "")
-# -c|--toggle: toggles play/pause
-# -p|--prev: prev song on spotify
-# -n|--next: next song on spotify
-# -r|--play: play song
-# -s|--pause: pause song
-# -v|--volume: [ m: mute, u:unmute, t: toggle mute, x: sets volume, +-x: adjusts volume ]
-# -h|--help: show help
+HELP=$( cat<<-END_HELP
+spotifyc: Control spotify with ease
+
+    -m|--mute-ads <opt: alt_music_dir> [RUN ONLY ONCE]
+    -o|--output : give details on current song
+                  [for status bars like polybar, i3status, etc]
+    -f|--format: [ '{{ artist }}, {{ title }}, {{ album }}, .. see man playerctl for all' ]
+                  for icons, use {{ icon }}
+    -i|--icons "<icon to show when playing>" "<icon to show when song paused>": both args compulsory(can be "")
+    -c|--toggle: toggles play/pause
+    -p|--prev: prev song on spotify
+    -n|--next: next song on spotify
+    -r|--play: play song
+    -s|--pause: pause song
+    -v|--volume: [ m: mute, u:unmute, t: toggle mute, x: sets volume, +-x: adjusts volume ]
+    -h|--help: show help
+END_HELP
+)
 
 CONFIG_DIR="$HOME/.config/spotifyc"
 [ -d "$CONFIG_DIR" ] || mkdir "$CONFIG_DIR" || { (>&2 echo "Couldn't create config directory"); exit 1; }
@@ -98,7 +102,7 @@ while (( $# > 0 )); do
             shift 2;;
 
         -h|--help )
-            #show-help
+            echo "$HELP"
             shift ;;
 
         * )
