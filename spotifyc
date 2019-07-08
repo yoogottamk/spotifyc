@@ -93,10 +93,18 @@ while (( $# > 0 )); do
             else
                 vol="$( grep -Po '(\+|-)?\d+' <<< "$vol" )"
 
+                if [[ "${vol:0:1}" == '+' ]]; then
+                    rel='+'
+                    vol="${vol:1}"
+                elif [[ "${vol:0:1}" == '-' ]]; then
+                    rel='-'
+                    vol="${vol:1}"
+                fi
+
                 # spotify uses 0-65535 for managing it's volume
                 vol="$(( (vol*65536)/100 ))"
 
-                pactl set-sink-input-volume "$sink" "$vol"
+                pactl set-sink-input-volume "$sink" "${rel}${vol}"
             fi
 
             shift 2;;
