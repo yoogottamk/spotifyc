@@ -65,10 +65,17 @@ Alternatively, you can place both the executables in some directory which is in 
     $ spotifyc -m '<alt_music_dir>'
     ```
         -m: mutes ads on spotify
-        if provided, songs present in 'alt_music_dir' will be played
+        if provided, a random song present in 'alt_music_dir' will be played, and then spotify will resume again
 
-    __NOTE__: make sure only one instance is running at a time
+    ## NOTE
+    Make sure only one instance is running at a time
     [you don't want 2 different songs playing whenever an ad comes]
+
+    Make sure you have nothing other than songs in 'alt_music_dir'
+    [since vlc can play so many formats, having a check in code didn\'t make sense]
+
+    If you have songs shorter in length than the advertisement, you unfortunately
+    will have to listen to the ad, and maybe resume spotify again.
 
     ### How to run?
     If you simply run this command, it will block your shell.
