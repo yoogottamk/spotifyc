@@ -46,16 +46,29 @@ class MuteSpotifyAds:
         main.run()
 
     def bind_player(self, manager, player_name):
+        """
+        Runs on "name-appeared"
+        Used to listen for new players when spotify isn't already running
+        """
         if not self.spotify_bound and player_name.name == "spotify":
             spotify = Playerctl.Player.new_from_name(player_name)
             spotify.connect("metadata", self.mute_ads, self.manager)
             self.manager.manage_player(spotify)
 
     def unbind_player(self, manager, player):
+        """
+        Runs on "player-vanished"
+        Used to set a flag which will allow searching for spotify if it
+            starts again
+        """
         if player.props.player_name == "spotify":
             self.spotify_bound = False
 
     def play_alt_song(self):
+        """
+        This function plays a song from the 'alt_music_dir' directory
+            using vlc
+        """
         # assuming that alt_music_dir contains only music files
         music_file_path = random.choice(os.listdir(self.alt_music_dir))
 
@@ -69,6 +82,10 @@ class MuteSpotifyAds:
         time.sleep(length)
 
     def get_spotify_sink(self):
+        """
+        This function returns the audio 'sink-input' for spotify
+        [Is there any better way? please help!]
+        """
         pactl_out = subprocess.check_output(["pactl", "list", "sink-inputs"]).decode().strip().split()
         closest_index = pactl_out.index('"Spotify"')
         sink_index = "#-1"
@@ -80,9 +97,17 @@ class MuteSpotifyAds:
         return sink_index[1:]
 
     def mute_spotify(self):
+        """
+        This function mutes spotify
+        Only spotify, not system volume
+        """
         subprocess.run(["pactl", "set-sink-input-mute", self.get_spotify_sink(), "1"])
 
     def unmute_spotify(self):
+        """
+        This function unmutes spotify
+        Only spotify, not system volume
+        """
         subprocess.run(["pactl", "set-sink-input-mute", self.get_spotify_sink(), "0"])
 
     def handle_ad(self, player):
@@ -92,6 +117,13 @@ class MuteSpotifyAds:
         player.play()
 
     def mute_ads(self, player, metadata, manager):
+        """
+        The handler for whenever 'metadata' of spotify changes
+
+        The current != self.current check is required since it
+            got fired 4-5 times when a new song started playing.
+            This check ensures that spotify isn't unmuted unnecessarily
+        """
         artist = metadata['xesam:artist'][0]
         title = metadata['xesam:title']
         is_ad = self.is_ad(artist, title)
@@ -117,6 +149,9 @@ class MuteSpotifyAds:
                         self.unmute_spotify()
 
     def is_ad(self, artist, title):
+        """
+        The only things I saw whenever an ad on spotify started playing
+        """
         return (artist == "" and (title == "Advertisement" or title == "Spotify"))
 
 
