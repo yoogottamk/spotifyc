@@ -22,12 +22,12 @@ except socket.error as e:
     print("This process is already running")
     sys.exit(0)
 
-
 class MuteSpotifyAds:
-    def __init__(self, alt_music_dir=None):
+    def __init__(self, alt_music_dir=None, debug=False):
         self.manager = Playerctl.PlayerManager()
         self.alt_music_dir = alt_music_dir
         self.spotify_bound = False
+        self.debug = debug
 
         self.current = { "ad": False }
         self.previous = { "ad": False }
@@ -37,6 +37,9 @@ class MuteSpotifyAds:
                 spotify = Playerctl.Player.new_from_name(player_name)
                 spotify.connect("metadata", self.mute_ads, self.manager)
                 self.spotify_bound = True
+
+                self.log("Found Spotify, handler connected")
+
                 break
 
         self.manager.connect("name-appeared", self.bind_player)
@@ -44,6 +47,10 @@ class MuteSpotifyAds:
 
         main = GLib.MainLoop()
         main.run()
+
+    def log(self, data):
+        if self.debug:
+            print(data)
 
     def bind_player(self, manager, player_name):
         """
@@ -54,6 +61,7 @@ class MuteSpotifyAds:
             spotify = Playerctl.Player.new_from_name(player_name)
             spotify.connect("metadata", self.mute_ads, self.manager)
             self.manager.manage_player(spotify)
+            self.log("Spotify started, handler connected")
 
     def unbind_player(self, manager, player):
         """
@@ -63,12 +71,14 @@ class MuteSpotifyAds:
         """
         if player.props.player_name == "spotify":
             self.spotify_bound = False
+            self.log("Spotify stopped")
 
     def play_alt_song(self):
         """
         This function plays a song from the 'alt_music_dir' directory
             using vlc
         """
+        self.log("::play_alt_song")
         # assuming that alt_music_dir contains only music files
         music_file_path = random.choice(os.listdir(self.alt_music_dir))
 
@@ -79,6 +89,9 @@ class MuteSpotifyAds:
         # reqd otherwise vlc reports length to be 0.0
         time.sleep(1)
         length = vlc_player.get_length() / 1000
+
+        self.log(f"\tlength of song: {length}")
+
         time.sleep(length)
 
     def get_spotify_sink(self):
@@ -93,7 +106,9 @@ class MuteSpotifyAds:
         for i in range(closest_index, 1, -1):
             if pactl_out[i].startswith("#") and pactl_out[i-1] == "Input" and pactl_out[i-2] == "Sink":
                 sink_index = pactl_out[i]
+                break
 
+        self.log("::get_spotify_sink\n\tsink: " + sink_index[1:])
         return sink_index[1:]
 
     def mute_spotify(self):
@@ -101,6 +116,7 @@ class MuteSpotifyAds:
         This function mutes spotify
         Only spotify, not system volume
         """
+        self.log("::mute_spotify")
         subprocess.run(["pactl", "set-sink-input-mute", self.get_spotify_sink(), "1"])
 
     def unmute_spotify(self):
@@ -108,9 +124,11 @@ class MuteSpotifyAds:
         This function unmutes spotify
         Only spotify, not system volume
         """
+        self.log("::unmute_spotify")
         subprocess.run(["pactl", "set-sink-input-mute", self.get_spotify_sink(), "0"])
 
     def handle_ad(self, player):
+        self.log("::handle_ad")
         self.mute_spotify()
         self.play_alt_song()
         self.unmute_spotify()
@@ -131,8 +149,10 @@ class MuteSpotifyAds:
         current = { "artist": artist, "title": title, "ad": is_ad }
 
         if current != self.current:
+            self.log("::mute_ads\n\tmetadata changed")
             self.previous = self.current
             self.current = current
+            self.log(f"\t{self.current}")
 
             if self.alt_music_dir is not None:
                 if is_ad:
@@ -152,7 +172,12 @@ class MuteSpotifyAds:
         """
         The only things I saw whenever an ad on spotify started playing
         """
-        return (artist == "" and (title == "Advertisement" or title == "Spotify"))
+        self.log("::is_ad")
+
+        ad = (artist == "" and (title == "Advertisement" or title == "Spotify"))
+
+        self.log(f"\t{artist} {title} {ad}")
+        return ad
 
 
 if __name__ == '__main__':
@@ -164,4 +189,6 @@ if __name__ == '__main__':
     if not alt_music_dir or not os.path.isdir(alt_music_dir):
         alt_music_dir = None
 
-    MuteSpotifyAds(alt_music_dir)
+    debug = os.environ.get("SPOTIFYC_DEBUG")
+
+    MuteSpotifyAds(alt_music_dir, bool(debug))

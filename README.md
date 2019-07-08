@@ -103,6 +103,13 @@ This requires [playerctl](https://github.com/acrisci/playerctl), pactl(pulseaudi
     pip3 install python-vlc
 
 ## Issues
+If for some reason this isn\'t working, please run as follows:
+```sh
+$ SPOTIFYC_DEBUG=1 spotifyc -m "<alt_music_dir>"
+```
+This will print data on the screen which will help find the problem
+
+
 Please create issues on [GitHub](https://github.com/YoogottamK/spotifyc/issues)
 
 ## Note

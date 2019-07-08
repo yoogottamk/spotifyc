@@ -19,9 +19,6 @@ spotifyc: Control spotify with ease
 END_HELP
 )
 
-CONFIG_DIR="$HOME/.config/spotifyc"
-[ -d "$CONFIG_DIR" ] || mkdir "$CONFIG_DIR" || { (>&2 echo "Couldn't create config directory"); exit 1; }
-
 OUTPUT_FORMAT="{{ artist }}: {{ title }}"
 ICON_PAUSE=
 ICON_PLAY=
