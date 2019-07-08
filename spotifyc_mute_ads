@@ -58,13 +58,16 @@ class MuteSpotifyAds:
     def play_alt_song(self):
         if self.alt_music_dir == "" or not os.path.isdir(self.alt_music_dir):
             return
-        
+
         # assuming that alt_music_dir contains only music files
         music_file_path = random.choice(os.listdir(self.alt_music_dir))
 
-        vlc_player = vlc.MediaPlayer("file://" + self.alt_music_dir + music_file_path)
+        vlc_player = vlc.MediaPlayer("file://" + os.path.join(self.alt_music_dir, music_file_path))
         vlc_player.audio_set_volume(100)
         vlc_player.play()
+        # let vlc start playing
+        # reqd otherwise vlc reports length to be 0.0
+        time.sleep(1)
         length = vlc_player.get_length() / 1000
         time.sleep(length)
 
