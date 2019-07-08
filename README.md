@@ -54,7 +54,12 @@ Alternatively, you can place both the executables in some directory which is in 
 
     label = %output:0:37:...%
     format = %{A1:spotifyc -p:}%{A} <label> %{A1:spotifyc -n:}%{A}
+
     click-left = spotifyc -c
+    click-right = spotifyc -v t
+    ; adjust this if you have enabled natural scrolling
+    scroll-up = spotifyc -v '+5'
+    scroll-down = spotifyc -v '-5'
     ```
 
     ![polybar example](./polybar_eg.png)
