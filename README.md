@@ -70,3 +70,6 @@ This requires [playerctl](https://github.com/acrisci/playerctl), pactl(pulseaudi
 
 ## Issues
 Please create issues on [GitHub](https://github.com/YoogottamK/spotifyc/issues)
+
+## Note
+This project was created just for fun. If you really like Spotify and hate ads, consider paying for the premium account.
