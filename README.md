@@ -49,7 +49,7 @@ Alternatively, you can place both the executables in some directory which is in 
     format-underline = #2aa198
     interval = 1
 
-    exec = spotifyc -f "{{ icon  }} {{ artist  }}: {{ title  }}" -i "" "" -o
+    exec = spotifyc -f "{{ icon }} {{ artist }}: {{ title }}" -i "" "" -o
     exec-if = pgrep -x spotify
 
     label = %output:0:37:...%
@@ -82,13 +82,13 @@ Alternatively, you can place both the executables in some directory which is in 
     If you have songs shorter in length than the advertisement, you unfortunately
     will have to listen to the ad, and maybe resume spotify again.
 
-    ### How to run?
+    ## How to run?
     If you simply run this command, it will block your shell.
     Add an `&` at the end to run this in background.
     Ideally place this in some file while which runs when you log in [not `.bashrc` or `.zshrc`].
     In the standard case, `~/.profile` should work.
 
-    ### Inspiration
+    ## Inspiration
     Spotify ads which complain about how ads on Spotify are bad and irritating
 
 ## Formatting output
