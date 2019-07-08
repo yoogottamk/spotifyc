@@ -41,6 +41,24 @@ Alternatively, you can place both the executables in some directory which is in 
                                     song is playing or is paused repectively
         -o: prints the output in the specified format [defaults to '{{ artist }}: {{ title }}'
 
+    Example polybar config:
+
+    ```ini
+    [module/spotify]
+    type = custom/script
+    format-underline = #2aa198
+    interval = 1
+
+    exec = spotifyc -f "{{ icon  }} {{ artist  }}: {{ title  }}" -i "" "" -o
+    exec-if = pgrep -x spotify
+
+    label = %output:0:37:...%
+    format = %{A1:spotifyc -p:}%{A} <label> %{A1:spotifyc -n:}%{A}
+    click-left = spotifyc -c
+    ```
+
+    ![polybar example](./polybar_eg.png)
+
  - Mute ads on spotify and play some other song stored locally.
 
     ```sh
