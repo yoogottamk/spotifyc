@@ -35,7 +35,7 @@ while (( $# > 0 )); do
         -m|--mute-ads )
             [ -d "$2" ] && MUSIC_DIR="$2" || MUSIC_DIR=
 
-            ./spotifyc_mute_ads "$MUSIC_DIR"
+            spotifyc_mute_ads "$MUSIC_DIR"
 
             shift
             [ -z "$MUSIC_DIR" ] || shift ;;

@@ -2,6 +2,10 @@
 
 Mostly a wrapper around playerctl, with a few extra features 😉
 
+## How to use
+Clone this repository and add it in your `PATH`.
+Alternatively, you can place both the executables in some directory which is in `PATH`
+
 ## Features [in no specific order]
  - Basic track control:
     ```sh
