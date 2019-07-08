@@ -9,7 +9,7 @@ spotifyc: Control spotify with ease
     -f|--format: [ '{{ artist }}, {{ title }}, {{ album }}, .. see man playerctl for all' ]
                   for icons, use {{ icon }}
     -i|--icons "<icon to show when playing>" "<icon to show when song paused>": both args compulsory(can be "")
-    -c|--toggle: toggles play/pause
+    -c|--play-pause: toggles play/pause
     -p|--prev: prev song on spotify
     -n|--next: next song on spotify
     -r|--play: play song
@@ -22,7 +22,7 @@ END_HELP
 CONFIG_DIR="$HOME/.config/spotifyc"
 [ -d "$CONFIG_DIR" ] || mkdir "$CONFIG_DIR" || { (>&2 echo "Couldn't create config directory"); exit 1; }
 
-OUTPUT_FORMAT=
+OUTPUT_FORMAT="{{ artist }}: {{ title }}"
 ICON_PAUSE=
 ICON_PLAY=
 
@@ -40,7 +40,7 @@ while (( $# > 0 )); do
             shift
             [ -z "$MUSIC_DIR" ] || shift ;;
 
-        -c|--toggle )
+        -c|--play-pause )
             playerctl -p spotify play-pause
             shift ;;
 

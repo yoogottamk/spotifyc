@@ -24,7 +24,7 @@ except socket.error as e:
 
 
 class MuteSpotifyAds:
-    def __init__(self, alt_music_dir=""):
+    def __init__(self, alt_music_dir=None):
         self.manager = Playerctl.PlayerManager()
         self.alt_music_dir = alt_music_dir
         self.spotify_bound = False
@@ -56,9 +56,6 @@ class MuteSpotifyAds:
             self.spotify_bound = False
 
     def play_alt_song(self):
-        if self.alt_music_dir == "" or not os.path.isdir(self.alt_music_dir):
-            return
-
         # assuming that alt_music_dir contains only music files
         music_file_path = random.choice(os.listdir(self.alt_music_dir))
 
@@ -105,20 +102,31 @@ class MuteSpotifyAds:
             self.previous = self.current
             self.current = current
 
-            if is_ad:
-                if threading.activeCount() == 1:
-                    threading.Thread(target=self.handle_ad, args=(player,)).start()
+            if self.alt_music_dir is not None:
+                if is_ad:
+                    if threading.activeCount() == 1:
+                        threading.Thread(target=self.handle_ad, args=(player,)).start()
+                else:
+                    if self.previous["ad"]:
+                        player.pause()
             else:
-                if self.previous["ad"]:
-                    player.pause()
+                if is_ad:
+                    self.mute_spotify()
+                else:
+                    if self.previous["ad"]:
+                        self.unmute_spotify()
 
     def is_ad(self, artist, title):
         return (artist == "" and (title == "Advertisement" or title == "Spotify"))
 
+
 if __name__ == '__main__':
-    alt_music_dir = ''
+    alt_music_dir = ""
 
     if len(sys.argv) == 2:
         alt_music_dir = sys.argv[1]
+
+    if not alt_music_dir or not os.path.isdir(alt_music_dir):
+        alt_music_dir = None
 
     MuteSpotifyAds(alt_music_dir)
