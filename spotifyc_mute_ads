@@ -2,6 +2,7 @@
 
 import os
 import random
+import re
 import subprocess
 import sys
 import threading
@@ -97,19 +98,14 @@ class MuteSpotifyAds:
     def get_spotify_sink(self):
         """
         This function returns the audio 'sink-input' for spotify
-        [Is there any better way? please help!]
         """
-        pactl_out = subprocess.check_output(["pactl", "list", "sink-inputs"]).decode().strip().split()
-        closest_index = pactl_out.index('"Spotify"')
-        sink_index = "#-1"
+        pactl_out = subprocess.check_output(["pactl", "list", "sink-inputs"]).decode().strip().split("\n")
+        regex = re.compile(r'(^Sink Input)|(\s+media.name = "Spotify"$)')
 
-        for i in range(closest_index, 1, -1):
-            if pactl_out[i].startswith("#") and pactl_out[i-1] == "Input" and pactl_out[i-2] == "Sink":
-                sink_index = pactl_out[i]
-                break
+        sink = [ sink for sink in pactl_out if regex.match(sink) ][-2].split("#")[1]
 
-        self.log("::get_spotify_sink\n\tsink: " + sink_index[1:])
-        return sink_index[1:]
+        self.log("::get_spotify_sink\n\tsink: " + sink)
+        return sink
 
     def mute_spotify(self):
         """

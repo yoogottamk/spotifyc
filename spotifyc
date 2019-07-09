@@ -24,7 +24,7 @@ ICON_PAUSE=
 ICON_PLAY=
 
 function get-spotify-sink() {
-    pactl list sink-inputs | grep -P '(^Sink Input)|(media.name = "Spotify"$)' | grep "Spotify" -B1 | head -1 | cut -d'#' -f2
+    pactl list sink-inputs | grep -P '(^Sink Input)|(media.name = "Spotify"$)' | tail -2 | grep -Po '(?<=#)\d+'
 }
 
 while (( $# > 0 )); do
@@ -99,7 +99,7 @@ while (( $# > 0 )); do
                 fi
 
                 # spotify uses 0-65535 for managing it's volume
-                vol="$(( (vol*65536)/100 ))"
+                vol="$(( (vol*65535)/100 ))"
 
                 pactl set-sink-input-volume "$sink" "${rel}${vol}"
             fi
