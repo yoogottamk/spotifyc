@@ -4,12 +4,20 @@ Mostly a wrapper around playerctl, with a few extra features 😉
 
 ## How to use
 Clone this repository and add it in your `PATH`.
+```sh
+git clone https://github.com/YoogottamK/spotifyc
+cd spotifyc
+
+export PATH="$PATH:$PWD"
+or
+echo export PATH='$PATH':"$PWD" >> ~/.[z/ba/*]shrc && source ~/.[z/ba/*]shrc
+```
 Alternatively, you can place both the executables in some directory which is in `PATH`
 
 ## Features [in no specific order]
  - Basic track control:
     ```sh
-    $ spotifyc [-c|-p|-n|-r|-s]
+    spotifyc [-c|-p|-n|-r|-s]
     ```
         -c: toggle play/pause state
         -p: previous track
@@ -20,7 +28,7 @@ Alternatively, you can place both the executables in some directory which is in 
 
  - Control spotify's volume:
     ```sh
-    $ spotifyc -v [m|u|t|abs|+-rel]
+    spotifyc -v [m|u|t|abs|+-rel]
     ```
         m: mute
         u: unmute
@@ -33,13 +41,13 @@ Alternatively, you can place both the executables in some directory which is in 
     [i3blocks](https://github.com/vivien/i3blocks), etc
     (basically any status bar which allows you to run a script)
     ```sh
-    $ spotifyc -f '<format>' -i '<playing>' '<paused>' -o
+    spotifyc -f '<format>' -i '<playing>' '<paused>' -o
     ```
         -f '<format>': specify the format of output
                         [see formatting options below]
         -i '<playing>' '<paused>': specify the icons to be displayed when
                                     song is playing or is paused repectively
-        -o: prints the output in the specified format [defaults to '{{ artist }}: {{ title }}'
+        -o: prints the output in the specified format [defaults to '{{ artist }}: {{ title }}']
 
     Example polybar config:
 
@@ -67,7 +75,7 @@ Alternatively, you can place both the executables in some directory which is in 
  - Mute ads on spotify and play some other song stored locally.
 
     ```sh
-    $ spotifyc -m '<alt_music_dir>'
+    spotifyc -m '<alt_music_dir>'
     ```
         -m: mutes ads on spotify
         if provided, a random song present in 'alt_music_dir' will be played, and then spotify will resume again
@@ -105,7 +113,7 @@ This requires [playerctl](https://github.com/acrisci/playerctl), pactl(pulseaudi
 ## Issues
 If for some reason this isn\'t working, please run as follows:
 ```sh
-$ SPOTIFYC_DEBUG=1 spotifyc -m "<alt_music_dir>"
+SPOTIFYC_DEBUG=1 spotifyc -m "<alt_music_dir>"
 ```
 This will print data on the screen which will help find the problem
 
