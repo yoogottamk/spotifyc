@@ -102,7 +102,16 @@ class MuteSpotifyAds:
         pactl_out = subprocess.check_output(["pactl", "list", "sink-inputs"]).decode().strip().split("\n")
         regex = re.compile(r'(^Sink Input)|(\s+media.name = "Spotify"$)')
 
-        sink = [ sink for sink in pactl_out if regex.match(sink) ][-2].split("#")[1]
+        name_sink_pairs = [ text for text in pactl_out if regex.match(text) ]
+
+        sink = ''
+        s = ''
+
+        for ns in name_sink_pairs:
+            if "Spotify" in ns:
+                sink = s.split("#")[1]
+            else:
+                s = ns
 
         self.log("::get_spotify_sink\n\tsink: " + sink)
         return sink

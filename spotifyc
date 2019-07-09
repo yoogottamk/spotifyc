@@ -24,7 +24,8 @@ ICON_PAUSE=
 ICON_PLAY=
 
 function get-spotify-sink() {
-    pactl list sink-inputs | grep -P '(^Sink Input)|(media.name = "Spotify"$)' | tail -2 | grep -Po '(?<=#)\d+'
+    pactl list sink-inputs | grep -P '(^Sink Input)|(media.name = "Spotify"$)' |
+        awk '/Spotify/ { print sink } { sink = $0 }' | tail -1 | cut -d'#' -f2
 }
 
 while (( $# > 0 )); do
