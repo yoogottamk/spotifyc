@@ -13,7 +13,6 @@ or
 echo export PATH='$PATH':"$PWD" >> ~/.[z/ba/*]shrc && source ~/.[z/ba/*]shrc
 ```
 Alternatively, you can place both the executables in some directory which is in `PATH`
-
 ## Features [in no specific order]
  - Basic track control:
     ```sh
@@ -106,9 +105,20 @@ Check `man playerctl` to see all options and modifiers.
 Other than that, it also uses '{{ icon }}' which is used to display the icons specified by `-i|--icons`
 
 ## Requirements
-This requires [playerctl](https://github.com/acrisci/playerctl), pactl(pulseaudio), python3 and vlc bindings for python3
+ - Spotify (obviously)
 
+ - [PyGObject](https://pygobject.readthedocs.io/en/latest/getting_started.html#ubuntu-getting-started):
+
+    Note that you don\'t need the gtk3 package. I recommend installing from PyPI with pip.
+
+ - [playerctl](https://github.com/acrisci/playerctl#installing):
+
+    I recommend using google first to check if you can install it using your package manager before trying to build it
+
+- vlc bindings for python3
+    ```sh
     pip3 install python-vlc
+    ```
 
 ## Issues
 If for some reason this isn\'t working, please run as follows:
