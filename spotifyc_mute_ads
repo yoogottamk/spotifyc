@@ -23,6 +23,7 @@ except socket.error as e:
     print("This process is already running")
     sys.exit(0)
 
+
 class MuteSpotifyAds:
     def __init__(self, alt_music_dir=None, debug=False):
         self.manager = Playerctl.PlayerManager()
@@ -49,20 +50,24 @@ class MuteSpotifyAds:
         main = GLib.MainLoop()
         main.run()
 
+
     def log(self, data):
         if self.debug:
             print(data)
+
 
     def bind_player(self, manager, player_name):
         """
         Runs on "name-appeared"
         Used to listen for new players when spotify isn't already running
         """
+
         if not self.spotify_bound and player_name.name == "spotify":
             spotify = Playerctl.Player.new_from_name(player_name)
             spotify.connect("metadata", self.mute_ads, self.manager)
             self.manager.manage_player(spotify)
             self.log("Spotify started, handler connected")
+
 
     def unbind_player(self, manager, player):
         """
@@ -70,15 +75,18 @@ class MuteSpotifyAds:
         Used to set a flag which will allow searching for spotify if it
             starts again
         """
+
         if player.props.player_name == "spotify":
             self.spotify_bound = False
             self.log("Spotify stopped")
+
 
     def play_alt_song(self):
         """
         This function plays a song from the 'alt_music_dir' directory
             using vlc
         """
+
         self.log("::play_alt_song")
         # assuming that alt_music_dir contains only music files
         music_file_path = random.choice(os.listdir(self.alt_music_dir))
@@ -95,14 +103,16 @@ class MuteSpotifyAds:
 
         time.sleep(length)
 
+
     def get_spotify_sink(self):
         """
         This function returns the audio 'sink-input' for spotify
         """
-        pactl_out = subprocess.check_output(["pactl", "list", "sink-inputs"]).decode().strip().split("\n")
-        regex = re.compile(r'(^Sink Input)|(\s+media.name = "Spotify"$)')
 
-        name_sink_pairs = [ text for text in pactl_out if regex.match(text) ]
+        pactl_out = subprocess.check_output(["pactl", "list", "sink-inputs"]).decode().strip().split("\n")
+        rgx = re.compile(r'(^Sink Input)|(\s+media.name = "Spotify"$)')
+
+        name_sink_pairs = [ text for text in pactl_out if rgx.match(text) ]
 
         sink = ''
         s = ''
@@ -116,28 +126,34 @@ class MuteSpotifyAds:
         self.log("::get_spotify_sink\n\tsink: " + sink)
         return sink
 
+
     def mute_spotify(self):
         """
         This function mutes spotify
         Only spotify, not system volume
         """
+
         self.log("::mute_spotify")
         subprocess.run(["pactl", "set-sink-input-mute", self.get_spotify_sink(), "1"])
+
 
     def unmute_spotify(self):
         """
         This function unmutes spotify
         Only spotify, not system volume
         """
+
         self.log("::unmute_spotify")
         subprocess.run(["pactl", "set-sink-input-mute", self.get_spotify_sink(), "0"])
+
 
     def handle_ad(self, player):
         self.log("::handle_ad")
         self.mute_spotify()
         self.play_alt_song()
-        self.unmute_spotify()
         player.play()
+        self.unmute_spotify()
+
 
     def mute_ads(self, player, metadata, manager):
         """
@@ -147,6 +163,7 @@ class MuteSpotifyAds:
             got fired 4-5 times when a new song started playing.
             This check ensures that spotify isn't unmuted unnecessarily
         """
+
         artist = metadata['xesam:artist'][0]
         title = metadata['xesam:title']
         is_ad = self.is_ad(artist, title)
@@ -173,10 +190,12 @@ class MuteSpotifyAds:
                     if self.previous["ad"]:
                         self.unmute_spotify()
 
+
     def is_ad(self, artist, title):
         """
         The only things I saw whenever an ad on spotify started playing
         """
+
         self.log("::is_ad")
 
         ad = (artist == "" and (title == "Advertisement" or title == "Spotify"))
