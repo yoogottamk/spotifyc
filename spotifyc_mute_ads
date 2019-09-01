@@ -99,7 +99,7 @@ class MuteSpotifyAds:
         time.sleep(1)
         length = vlc_player.get_length() / 1000
 
-        self.log(f"\tlength of song: {length}")
+        self.log(f"{music_file_path}:{length}")
 
         time.sleep(length)
 
@@ -171,10 +171,10 @@ class MuteSpotifyAds:
         current = { "artist": artist, "title": title, "ad": is_ad }
 
         if current != self.current:
-            self.log("::mute_ads\n\tmetadata changed")
+            self.log("::mute_ads metadata changed")
             self.previous = self.current
             self.current = current
-            self.log(f"\t{self.current}")
+            self.log(f"{self.current}")
 
             if self.alt_music_dir is not None:
                 if is_ad:
@@ -196,11 +196,11 @@ class MuteSpotifyAds:
         The only things I saw whenever an ad on spotify started playing
         """
 
-        self.log("::is_ad")
-
         ad = (artist == "" and (title == "Advertisement" or title == "Spotify"))
 
-        self.log(f"\t{artist} {title} {ad}")
+        self.log("::is_ad")
+        self.log(f"{artist} {title}: ad? {ad}")
+
         return ad
 
 
