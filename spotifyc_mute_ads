@@ -198,9 +198,6 @@ class MuteSpotifyAds:
 
         ad = (artist == "" and (title == "Advertisement" or title == "Spotify"))
 
-        self.log("::is_ad")
-        self.log(f"{artist} {title}: ad? {ad}")
-
         return ad
 
 
